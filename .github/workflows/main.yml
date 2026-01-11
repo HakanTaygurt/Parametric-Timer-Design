@@ -1,0 +1,25 @@
+name: FPGA CI/CD
+
+# Ne zaman çalışacak? Her push yapıldığında.
+on: [push, pull_request]
+
+jobs:
+  verification:
+    runs-on: ubuntu-latest
+    # Bu container içinde GHDL, Yosys, SBY ve Python hazır gelir
+    container: yosyshq/oss-cad-suite-build
+
+    steps:
+      - name: Kodları Çek (Checkout)
+        uses: actions/checkout@v4
+
+      - name: VUnit Kütüphanesini Kur
+        run: pip3 install vunit_hdl
+
+      - name: VUnit Testlerini Çalıştır (Task 2)
+        # run.py dosyasının Linux uyumlu olması şart (aşağıdaki kodu kullan)
+        run: python3 run.py -v
+
+      - name: Formal Verification Çalıştır (Task 4 - Stretch Goal)
+        # timer.sby dosyasını çalıştırır
+        run: sby -f timer.sby
