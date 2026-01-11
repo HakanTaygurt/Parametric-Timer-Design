@@ -1,0 +1,14 @@
+# VUnit output directory (Simulation results)
+vunit_out/
+
+# Python compiled files
+__pycache__/
+*.pyc
+
+# IDE specific settings (VS Code, etc.)
+.vscode/
+.idea/
+
+# GHDL temp files 
+*.cf
+*.o
