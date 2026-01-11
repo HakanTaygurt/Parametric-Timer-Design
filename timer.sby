@@ -1,3 +1,4 @@
+cat <<EOF > timer.sby
 [tasks]
 bmc
 prove
@@ -11,10 +12,10 @@ prove: mode prove
 smtbmc
 
 [script]
-# --- KRITIK EKLEME: GHDL eklentisini yukle ---
+# --- KRITIK SATIR: GHDL eklentisini Yosys'e yukle ---
 plugin -i ghdl
 
-# VHDL dosyasini analiz et
+# Simdi GHDL komutu calisacaktir
 ghdl --std=08 src/timer.vhd -e timer
 
 # Formal Verification ayarlari
@@ -22,3 +23,4 @@ prep -top timer -chparam clk_freq_hz_g 1000 -chparam delay_g 5000000000000
 
 [files]
 src/timer.vhd
+EOF
