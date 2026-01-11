@@ -1,55 +1,86 @@
-# Parametric-Timer-Design
-FPGA Engineering Challenge: Parametric Timer Design. 
 
+# FPGA Engineering Challenge: Parametric Timer Design
 
+A clean, maintainable, and verifiable VHDL implementation of a parametric timer module. This project is designed to verify functionality through automated Python-based tests (VUnit) and continuous integration.
 
-Features
-Parametric Design: Customizable clock frequency (clk_freq_hz_g) and delay duration (delay_g).
+## 🚀 Features
 
-Math: Uses native VHDL integer division for precise clock cycle calculations without floating-point risks.
+* **Parametric Design:** Fully customizable via generics for clock frequency (`clk_freq_hz_g`) and delay duration (`delay_g`).
+* **Robust Math:** Utilizes native VHDL type conversions for precise clock cycle calculations, ensuring synthesis readiness.
+* **Automated Testing:** Powered by **VUnit** and Python to execute multiple test cases automatically.
+* **Self-Checking Testbench:** Automatically verifies if the elapsed time matches the expected delay within a strict tolerance window.
 
-Automated Testing: Python-based runner executes multiple test cases automatically.
+##  Prerequisites
 
-Self-Checking Testbench: Automatically verifies if the elapsed time matches the expected delay within a tolerance window.
+To run the verification suite without errors, ensure you have the following installed:
 
-   Prerequisites
-To run this project, you need:
+1.  **Python 3.x** (Standard installation)
+2.  **GHDL Simulator:**
+    * *Linux:* Install via package manager (e.g., `sudo apt install ghdl`).
+    * *Windows:* The [MinGW/mcode version](https://github.com/ghdl/ghdl/releases) is recommended.
+    * **Important:** Ensure the `ghdl` command is accessible in your system `PATH`.
 
-Python 3.x
+##  Quick Start & Execution
 
-GHDL (Simulator). Note: For Windows, the standalone MinGW/mcode version is recommended.
+Follow these steps to run the verification suite immediately:
 
-VUnit (Python library).
+### 1. Install Dependencies
+Open your terminal in the project root and install the VUnit library:
 
-Installation
-Bash
+```bash
+pip install vunit_hdl
+# OR if you prefer requirements file:
+# pip install -r requirements.txt
 
-pip install -r requirements.txt
-Ensure that ghdl is accessible in your system PATH or configured in run.py.
+```
 
-   How to Run Tests
-Execute the automation script from the root directory:
+### 2. Run the Verification Script
 
-Bash
+Execute the Python automation script with the verbose flag to see real-time output:
 
+```bash
 python run.py -v
-Expected Output: The script will compile the VHDL files and run two test configurations:
 
-100MHz_10us: Validates a 10 us delay at 100 MHz.
+```
 
-10MHz_1ms: Validates a 1 ms delay at 10 MHz.
+###  Expected Output
 
-   Design Decisions
-1. Cycle Calculation Logic (RTL)
-To determine the number of clock cycles required for the target delay, the design avoids using floating-point arithmetic (e.g., ieee.math_real.ceil).
+If the environment is set up correctly, you will see the compilation process followed by the test results. Look for the **PASS** confirmation:
 
-While ceil offers precise mathematical rounding, using real types can introduce simulation-synthesis mismatches. Therefore, the design relies on VHDL's native strong typing by calculating the period first and using integer division:
+```text
+...
+Compiling src/timer.vhd
+Compiling tb/tb_timer.vhd
+...
+test_runner:100MHz_10us  PASS
+test_runner:10MHz_1ms    PASS
+...
+==== Summary ====================================================================
+pass 2 of 2
+=================================================================================
 
-VHDL
+```
 
-constant CLK_PERIOD : time := 1 sec / clk_freq_hz_g;
-constant CYCLES_REQUIRED : natural := delay_g / CLK_PERIOD;
-2. Verification Strategy (Testbench)
-Generic Handling: Due to limitations in passing time types via command-line arguments in GHDL/VUnit, the testbench accepts the delay as a natural integer (microseconds). This is internally converted to VHDL time units.
+---
 
-Checks: The testbench captures the simulation time delta between the trigger and completion signals, ensuring the RTL respects the requested delay within a 2-clock-cycle tolerance margin.
+##  Design Decisions & Trade-offs
+
+### 1. Cycle Calculation (RTL)
+
+To determine the precise number of clock cycles required for the target delay, the design handles the conversion between `time` and `natural` types carefully using `ieee.math_real`. This ensures that the timer behaves deterministically across different simulation and synthesis tools.
+
+### 2. Verification Strategy
+
+* **Generic Handling:** The testbench accepts delays as natural integers (microseconds) to bypass command-line limitations, converting them to VHDL time units internally.
+* **Tolerance Checks:** The testbench captures the simulation time delta between start and completion, asserting failure if the result deviates by more than 2 clock cycles.
+
+### 3. Formal Verification (Stretch Goal)
+
+An attempt was made to implement **Formal Verification** using **SymbiYosys (SBY)** to mathematically prove the timer's properties (using PSL assertions).
+
+* **Decision:** This module was **excluded** from the final submission.
+* **Reasoning:** While the properties were defined, persistent instability in the containerized toolchain (specifically regarding the GHDL-Yosys plugin integration) posed a risk to the reproducibility of the main pipeline. To prioritize a robust, error-free, and cross-platform simulation environment, the focus was shifted entirely to the VUnit verification suite.
+
+```
+
+```
