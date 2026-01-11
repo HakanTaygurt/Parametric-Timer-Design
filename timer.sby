@@ -1,7 +1,5 @@
 [tasks]
-# Bounded Model Checking: Checks for property violations within a fixed depth
 bmc
-# Proof: Attempts to prove properties hold for all reachable states
 prove
 
 [options]
@@ -10,26 +8,17 @@ bmc: depth 20
 prove: mode prove
 
 [engines]
-# Use the SMT solver (Yices/Z3) for verification
 smtbmc
 
 [script]
-# 1. Analyze the VHDL file using GHDL with VHDL-2008 standard
+# --- KRITIK EKLEME: GHDL eklentisini yukle ---
+plugin -i ghdl
+
+# VHDL dosyasini analiz et
 ghdl --std=08 src/timer.vhd -e timer
 
-# 2. Prepare the design and override generics for Formal Verification.
-# REAL WORLD: 100 MHz clock, 1 ms delay = 100,000 cycles (Too large for solvers).
-# FORMAL WORLD: We scale down to prove the logic without waiting 100k cycles.
-#
-# Configuration:
-# - Clock Frequency: 1 kHz (Period = 1 ms = 1,000,000,000,000 fs)
-# - Target Delay:    5 ms (5 cycles)
-#
-# Note: GHDL handles 'time' generics as integers in femtoseconds (fs).
-# 5 ms = 5,000,000,000,000 fs.
-
+# Formal Verification ayarlari
 prep -top timer -chparam clk_freq_hz_g 1000 -chparam delay_g 5000000000000
 
 [files]
-# Path to the source file
 src/timer.vhd
